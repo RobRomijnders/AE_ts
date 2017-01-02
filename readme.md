@@ -38,6 +38,16 @@ Here are some examples, each column represents another input class
 ![examples](https://github.com/RobRomijnders/AE_ts/blob/master/im/data_examples.png?raw=true)
 
 ## Results
-We run the recurrent auto encoder with a 20D latent space. The following figure plots the latent vectors with both PCA and tSNE
+We run the recurrent auto encoder with a 20D latent space. The following figure plots the latent vectors with both PCA and tSNE. 
+![latent_vectors](https://github.com/RobRomijnders/AE_ts/blob/master/im/latent_vectors2.png?raw=true)
+
+This figure shows that the latent space exhibits structure. We color the vectors with their corresponding labels. The light blue and
+dark blue labels obviously cluster in different parts of the space. Interestingly, the lower left corner in the tSNE shows another cluster of
+orange points. That might be interesting for doctors to look at. 
+_(Note that the class distributions are highly unbalanced. The orange and greeen colored data occur less frequently)_
+
+##Conclusion
+We present an auto encoder that learns structure in the time-series. Training is unsupervised. When we color the latent vectors with the actual labels,
+we show that the structure makes sense. 
 
 
