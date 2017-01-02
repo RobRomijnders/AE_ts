@@ -53,21 +53,22 @@ def plot_data(X_train, y_train, plot_row = 5):
   
 def plot_z_run(z_run,label):
   from sklearn.decomposition import TruncatedSVD
-  f1, ax1 = plt.subplots(2, 2)
+  f1, ax1 = plt.subplots(2, 1)
 
   PCA_model = TruncatedSVD(n_components=3).fit(z_run)
   z_run_reduced = PCA_model.transform(z_run)
-  ax1[0,0].scatter(z_run_reduced[:,0],z_run_reduced[:,1],c=label,marker='*',linewidths = 0)
-  ax1[0,1].scatter(z_run_reduced[:,2],z_run_reduced[:,1],c=label,marker='*',linewidths = 0)
-  ax1[0,0].set_title('PCA on z_run')
-  ax1[1,1].scatter(z_run_reduced[:,2],z_run_reduced[:,0],c=label,marker='*',linewidths = 0)
-  ax1[0,1].set_title('PCA on z_run')
+  ax1[0].scatter(z_run_reduced[:,0],z_run_reduced[:,1],c=label,marker='*',linewidths = 0)
+  ax1[0].set_title('PCA on z_run')
+#  ax1[0,1].scatter(z_run_reduced[:,2],z_run_reduced[:,1],c=label,marker='*',linewidths = 0)
+#  ax1[0,0].set_title('PCA on z_run')
+#  ax1[1,1].scatter(z_run_reduced[:,2],z_run_reduced[:,0],c=label,marker='*',linewidths = 0)
+#  ax1[0,1].set_title('PCA on z_run')
   
   from sklearn.manifold import TSNE
   tSNE_model = TSNE(verbose=2, perplexity=30,min_grad_norm=1E-12,n_iter=3000)
   z_run_tsne = tSNE_model.fit_transform(z_run)
-  ax1[1,0].scatter(z_run_tsne[:,0],z_run_tsne[:,1],c=label,marker='*',linewidths = 0)
-  ax1[1,0].set_title('tSNE on z_run')
+  ax1[1].scatter(z_run_tsne[:,0],z_run_tsne[:,1],c=label,marker='*',linewidths = 0)
+  ax1[1].set_title('tSNE on z_run')
   return
 
 class Model():
@@ -90,7 +91,7 @@ class Model():
     self.x_exp = tf.expand_dims(self.x,1)
     self.keep_prob = tf.placeholder("float")
 
-    with tf.variable_scope("Enc") as scope:  
+    with tf.variable_scope("Encoder") as scope:  
       #Th encoder cell, multi-layered with dropout
       cell_enc = tf.nn.rnn_cell.LSTMCell(hidden_size)
       cell_enc = tf.nn.rnn_cell.MultiRNNCell([cell_enc] * num_layers)
@@ -117,7 +118,7 @@ class Model():
       b_state = tf.get_variable('b_state',[hidden_size])
       z_state = tf.nn.xw_plus_b(self.z_mu,W_state,b_state,name='z_state')  #mu, mean, of latent space
       
-    with tf.variable_scope("Dec") as scope:
+    with tf.variable_scope("Decoder") as scope:
       # The decoder, also multi-layered
       cell_dec = tf.nn.rnn_cell.LSTMCell(hidden_size)
       cell_dec = tf.nn.rnn_cell.MultiRNNCell([cell_dec] * num_layers)
@@ -142,7 +143,7 @@ class Model():
     with tf.name_scope("train") as scope:
       #Use learning rte decay
       global_step = tf.Variable(0,trainable=False)
-      lr = tf.train.exponential_decay(learning_rate,global_step,1000,0.8,staircase=False)
+      lr = tf.train.exponential_decay(learning_rate,global_step,1000,0.1,staircase=False)
       
       
       self.loss = self.loss_seq + self.loss_lat_batch

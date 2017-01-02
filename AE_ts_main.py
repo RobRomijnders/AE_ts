@@ -8,11 +8,17 @@ direc = '/home/rob/Dropbox/ml_projects/LSTM/UCR_TS_Archive_2015'
 
 
 import numpy as np
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
 import tensorflow as tf
+tf.logging.set_verbosity(tf.logging.ERROR)
+
+
 import matplotlib.pyplot as plt
 import os
 from tensorflow.contrib.tensorboard.plugins import projector
-from AE_ts_model import Model, open_data, plot_data
+from AE_ts_model import Model, open_data, plot_data, plot_z_run
 
 
 """Hyperparameters"""
@@ -27,7 +33,7 @@ config['crd'] = 1                       #Hyperparameter for future generalizatio
 config['num_l'] = 20                    #number of units in the latent space
 
 plot_every = 100                        #after _plot_every_ GD steps, there's console output
-max_iterations = 200                   #maximum number of iterations
+max_iterations = 1000                   #maximum number of iterations
 dropout = 0.8                           #Dropout rate 
 """Load the data"""
 X_train,X_val,y_train,y_val = open_data('/home/rob/Dropbox/ml_projects/LSTM/UCR_TS_Archive_2015')
@@ -46,7 +52,7 @@ if base != 0:
   y_train -=base
   y_val -= base
 
-#Plot data
+#Plot data   # and save high quality plt.savefig('data_examples.eps', format='eps', dpi=1000)
 plot_data(X_train,y_train)
 
 

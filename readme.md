@@ -34,5 +34,10 @@ of the input under this distribution. We train this using backpropagation into t
 I showcase the recurrent auto encoder on a dataset of 5000 ECG's. Accurately named ECG5000 on the [UCR archive](http://www.cs.ucr.edu/~eamonn/time_series_data/). I choose
 ECG, because humans understand them easily. Yet, their complexity remains challenging enough for a machine learning model.
 
-Here are some examples:
+Here are some examples, each column represents another input class
 ![examples](https://github.com/RobRomijnders/AE_ts/blob/master/im/data_examples.png?raw=true)
+
+## Results
+We run the recurrent auto encoder with a 20D latent space. The following figure plots the latent vectors with both PCA and tSNE
+
+
