@@ -50,4 +50,14 @@ _(Note that the class distributions are highly unbalanced. The orange and greeen
 We present an auto encoder that learns structure in the time-series. Training is unsupervised. When we color the latent vectors with the actual labels,
 we show that the structure makes sense. 
 
+## Versions
+I get repeated questions to update the repo for newer library versions. I cannot guarantee this as I have many projects on hand.
+This repo works with
+
+  * Python 3.5
+  * Tensorflow 1.2
+  * Numpy 1.13.1
+  * Matplotlib 2.0.0
+
+As always, I am curious to any comments and questions. Reach me at romijndersrob@gmail.com
 
