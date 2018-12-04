@@ -10,6 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 from tensorflow.contrib.rnn import LSTMCell
+from sklearn.manifold import TSNE
+from sklearn.decomposition import TruncatedSVD
 
 
 def open_data(direc, ratio_train=0.8, dataset="ECG5000"):
@@ -40,7 +42,8 @@ def plot_data(X_train, y_train, plot_row=5):
         for n in range(plot_row):  # Loops over rows
             axarr[n, c].plot(X_train[ind_plot[n], :])
             # Only shops axes for bottom row and left column
-            if n == 0: axarr[n, c].set_title('Class %.0f (%.0f)' % (c, counts[float(c)]))
+            if n == 0:
+                axarr[n, c].set_title('Class %.0f (%.0f)' % (c, counts[float(c)]))
             if not n == plot_row - 1:
                 plt.setp([axarr[n, c].get_xticklabels()], visible=False)
             if not c == 0:
@@ -52,24 +55,27 @@ def plot_data(X_train, y_train, plot_row=5):
 
 
 def plot_z_run(z_run, label, ):
-    from sklearn.decomposition import TruncatedSVD
     f1, ax1 = plt.subplots(2, 1)
 
+    # First fit a PCA
     PCA_model = TruncatedSVD(n_components=3).fit(z_run)
     z_run_reduced = PCA_model.transform(z_run)
     ax1[0].scatter(z_run_reduced[:, 0], z_run_reduced[:, 1], c=label, marker='*', linewidths=0)
     ax1[0].set_title('PCA on z_run')
-    from sklearn.manifold import TSNE
+
+    # THen fit a tSNE
     tSNE_model = TSNE(verbose=2, perplexity=80, min_grad_norm=1E-12, n_iter=3000)
     z_run_tsne = tSNE_model.fit_transform(z_run)
     ax1[1].scatter(z_run_tsne[:, 0], z_run_tsne[:, 1], c=label, marker='*', linewidths=0)
     ax1[1].set_title('tSNE on z_run')
+
+    plt.show()
     return
 
 
-class Model():
+class Model:
     def __init__(self, config):
-        """Hyperparameters"""
+        # Hyperparameters
         num_layers = config['num_layers']
         hidden_size = config['hidden_size']
         max_grad_norm = config['max_grad_norm']
@@ -86,7 +92,7 @@ class Model():
         self.x_exp = tf.expand_dims(self.x, 1)
         self.keep_prob = tf.placeholder("float")
 
-        with tf.variable_scope("Encoder") as scope:
+        with tf.variable_scope("Encoder"):
             # Th encoder cell, multi-layered with dropout
             cell_enc = tf.contrib.rnn.MultiRNNCell([LSTMCell(hidden_size) for _ in range(num_layers)])
             cell_enc = tf.contrib.rnn.DropoutWrapper(cell_enc, output_keep_prob=self.keep_prob)
@@ -99,24 +105,27 @@ class Model():
             W_mu = tf.get_variable('W_mu', [hidden_size, num_l])
 
             outputs_enc, _ = tf.contrib.rnn.static_rnn(cell_enc,
-                                                      inputs=tf.unstack(self.x_exp, axis=2),
-                                                      initial_state=initial_state_enc)
+                                                       inputs=tf.unstack(self.x_exp, axis=2),
+                                                       initial_state=initial_state_enc)
             cell_output = outputs_enc[-1]
-
             b_mu = tf.get_variable('b_mu', [num_l])
+
+            # For all intents and purposes, self.z_mu is the Tensor containing the hidden representations
+            # I got many questions over email about this. If you want to do visualization, clustering or subsequent
+            #   classification, then use this z_mu
             self.z_mu = tf.nn.xw_plus_b(cell_output, W_mu, b_mu, name='z_mu')  # mu, mean, of latent space
 
             # Train the point in latent space to have zero-mean and unit-variance on batch basis
             lat_mean, lat_var = tf.nn.moments(self.z_mu, axes=[1])
             self.loss_lat_batch = tf.reduce_mean(tf.square(lat_mean) + lat_var - tf.log(lat_var) - 1)
 
-        with tf.name_scope("Lat_2_dec") as scope:
+        with tf.name_scope("Lat_2_dec"):
             # layer to generate initial state
             W_state = tf.get_variable('W_state', [num_l, hidden_size])
             b_state = tf.get_variable('b_state', [hidden_size])
             z_state = tf.nn.xw_plus_b(self.z_mu, W_state, b_state, name='z_state')  # mu, mean, of latent space
 
-        with tf.variable_scope("Decoder") as scope:
+        with tf.variable_scope("Decoder"):
             # The decoder, also multi-layered
             cell_dec = tf.contrib.rnn.MultiRNNCell([LSTMCell(hidden_size) for _ in range(num_layers)])
 
@@ -127,7 +136,7 @@ class Model():
             outputs_dec, _ = tf.contrib.rnn.static_rnn(cell_dec,
                                                        inputs=dec_inputs,
                                                        initial_state=initial_state_dec)
-        with tf.name_scope("Out_layer") as scope:
+        with tf.name_scope("Out_layer"):
             params_o = 2 * crd  # Number of coordinates + variances
             W_o = tf.get_variable('W_o', [hidden_size, params_o])
             b_o = tf.get_variable('b_o', [params_o])
@@ -140,7 +149,7 @@ class Model():
             loss_seq = -px
             self.loss_seq = tf.reduce_mean(loss_seq)
 
-        with tf.name_scope("train") as scope:
+        with tf.name_scope("train"):
             # Use learning rte decay
             global_step = tf.Variable(0, trainable=False)
             lr = tf.train.exponential_decay(learning_rate, global_step, 1000, 0.1, staircase=False)
