@@ -68,6 +68,7 @@ To my great joy, I receive many questions and suggestions over email. I compiled
 
   * The loss function on the latent space resembles the VAE loss function. How does your model differ from the VAE?
   		For clarity, this question usually refers to the loss in `tf.reduce_mean(tf.square(lat_mean) + lat_var - tf.log(lat_var) - 1)`. I see two immediate differences with the VAE
+  		
   			* The VAE follows from amortized inference on a latent variable model. All terms in the VAE model have a probabilistic interpretation. In contrast, our auto encoder learns according to the maximum likelihood principle. We implement this loss functions only to improve our visualization.
   			* The VAE penalizes the KL divergence with the prior for each representation. In contrast, we penalize the KL divergence with the marginal distribution on the representations. In other words, the VAE *wants* each representation to have zero mean and unit variance; our auto encoder want all representations marginally to have zero mean and unit variance. 
 
