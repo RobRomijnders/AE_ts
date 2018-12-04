@@ -1,4 +1,7 @@
 ## Auto encoder for time series
+
+EDIT 3 December 2018, I receive many questions over email. I compiled the most common questions into a FAQ at the end of this readme
+
 This repo presents a simple auto encoder for time series. It visualizes the embeddings using both PCA and tSNE. I show this on a dataset of 5000 ECG's. The model doesn't use
 the labels during training. Yet, the produced clusters visually separate the classes of ECG's.
 
@@ -50,14 +53,25 @@ _(Note that the class distributions are highly unbalanced. The orange and greeen
 We present an auto encoder that learns structure in the time-series. Training is unsupervised. When we color the latent vectors with the actual labels,
 we show that the structure makes sense. 
 
-## Versions
-I get repeated questions to update the repo for newer library versions. I cannot guarantee this as I have many projects on hand.
-This repo works with
+## FAQ
+To my great joy, I receive many questions and suggestions over email. I compiled some of the commonly asked questions so you can get started quickly
 
-  * Python 3.5
-  * Tensorflow 1.2
-  * Numpy 1.13.1
-  * Matplotlib 2.0.0
+  * How can I use the representations for other purposes than visualization?
+  		After training, you can fetch the representations by running `sess.run(model.z_mu, feed_dict=my_feed_dict)`
+
+  * I get an import error. What versions do you use?
+  		See the `docs/requirements.txt` file for all versions
+  
+  * How could I extract classes from the representations?
+  		The auto-encoder framework belongs to unsupervised learning. Hence, classes will only follow from some sort of clustering. You can apply a clustering model to the hidden representations. Or you could implement another model that naturally clusters time series, for example neural expectation maximization or simply HMM's.
+  		Moreover, if you do have supervision for your data, then I recommend you to use supervised model. For example, a linear classification model, linear dynamical systems or a normal recurrent/convolutional neural network.
+
+  * The loss function on the latent space resembles the VAE loss function. How does your model differ from the VAE?
+  		For clarity, this question usually refers to the loss in `tf.reduce_mean(tf.square(lat_mean) + lat_var - tf.log(lat_var) - 1)`. I see two immediate differences with the VAE
+  			* The VAE follows from amortized inference on a latent variable model. All terms in the VAE model have a probabilistic interpretation. In contrast, our auto encoder learns according to the maximum likelihood principle. We implement this loss functions only to improve our visualization.
+  			* The VAE penalizes the KL divergence with the prior for each representation. In contrast, we penalize the KL divergence with the marginal distribution on the representations. In other words, the VAE *wants* each representation to have zero mean and unit variance; our auto encoder want all representations marginally to have zero mean and unit variance. 
+
+Please let me know if I forgot your questions in this FAQ section
 
 As always, I am curious to any comments and questions. Reach me at romijndersrob@gmail.com
 
