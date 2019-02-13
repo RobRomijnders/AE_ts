@@ -55,16 +55,17 @@ do_plot_example = False
 if do_plot_example:
     plot_data(X_train, y_train)
 
-# Proclaim the epochs
-epochs = np.floor(batch_size * max_iterations / N)
-print('Train with approximately %d epochs' % epochs)
-
 """Training time!"""
 model = Model(config)
 sess = tf.Session()
 perf_collect = np.zeros((2, int(np.floor(max_iterations / plot_every))))
 do_train = False
 if do_train:
+
+    # Proclaim the epochs
+    epochs = np.floor(batch_size * max_iterations / N)
+    print('Train with approximately %d epochs' % epochs)
+
     sess.run(model.init_op)
     writer = tf.summary.FileWriter(LOG_DIR, sess.graph)  # writer for Tensorboard
 
