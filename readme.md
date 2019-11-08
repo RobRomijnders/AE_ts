@@ -49,7 +49,7 @@ dark blue labels obviously cluster in different parts of the space. Interestingl
 orange points. That might be interesting for doctors to look at. 
 _(Note that the class distributions are highly unbalanced. The orange and greeen colored data occur less frequently)_
 
-##Conclusion
+## Conclusion
 We present an auto encoder that learns structure in the time-series. Training is unsupervised. When we color the latent vectors with the actual labels,
 we show that the structure makes sense. 
 
